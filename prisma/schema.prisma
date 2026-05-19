@@ -1,0 +1,140 @@
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum AssetStatus {
+  ATIVO
+  INATIVO
+  MANUTENCAO
+  CHAMADO
+  BAIXADO
+  ENVIADO
+  GARANTIA
+}
+
+enum UserStatus {
+  ATIVO
+  INATIVO
+  SUSPENSO
+}
+
+model City {
+  id        String    @id @default(uuid())
+  name      String    @unique
+  createdAt DateTime  @default(now()) @map("created_at")
+
+  departments Department[]
+  users       User[]
+
+  @@map("cities")
+}
+
+model Brand {
+  id          String    @id @default(uuid())
+  name        String    @unique
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+  deletedAt   DateTime? @map("deleted_at")
+  
+  assets      Asset[]
+
+  @@map("brands")
+}
+
+model UserType {
+  id        String    @id @default(uuid())
+  name      String    @unique
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+  deletedAt DateTime? @map("deleted_at")
+
+  users     User[]
+
+  @@map("user_types")
+}
+
+model AssetType {
+  id        String    @id @default(uuid())
+  name      String    @unique
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+  deletedAt DateTime? @map("deleted_at")
+
+  assets    Asset[]
+
+  @@map("asset_types")
+}
+
+
+model Department {
+  id          String      @id @default(uuid())
+  reference   String?     @unique
+  name        String 
+  description String?
+  createdAt   DateTime    @default(now()) @map("created_at")
+  updatedAt   DateTime    @updatedAt @map("updated_at")
+  deletedAt   DateTime?   @map("deleted_at")
+
+  cityId      String
+  City        City        @relation(fields: [cityId], references: [id])
+
+  assets      Asset[]
+  users       User[]
+
+  @@map("departments")
+}
+
+model Asset {
+  id              String              @id @default(uuid())
+  patrimony       String?             @unique
+  serialNumber    String?             @unique @map("serial_number")
+  description     String?
+  status          AssetStatus         @default(ATIVO)
+  createdAt       DateTime            @default(now()) @map("created_at")
+  updatedAt       DateTime            @updatedAt @map("updated_at")
+  deletedAt       DateTime?           @map("deleted_at")
+
+  brandId         String
+  Brand           Brand               @relation(fields: [brandId], references: [id])
+
+  assetTypeId     String
+  AssetType       AssetType           @relation(fields: [assetTypeId], references: [id])
+
+  departmentId    String
+  Department      Department          @relation(fields: [departmentId], references: [id])
+
+  @@map("assets")
+}
+
+model User {
+  id          String    @id @default(uuid())
+  name        String
+  email       String    @unique
+  password    String
+  document    String?   @unique
+  address     String?
+  status      UserStatus    @default(ATIVO)
+  
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+  deletedAt   DateTime? @map("deleted_at")
+
+  userTypeId  String
+  UserType    UserType    @relation(fields: [userTypeId], references: [id])
+
+  cityId      String
+  City        City        @relation(fields: [cityId], references: [id])
+
+  departmentId    String?
+  Department      Department?    @relation(fields: [departmentId], references: [id])
+
+  @@map("users")
+}
+
+
