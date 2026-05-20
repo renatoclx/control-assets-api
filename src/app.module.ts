@@ -6,7 +6,6 @@ import { JwtStrategy } from './http/auth/jwt.strategy';
 
 @Module({
   imports: [PrismaModule, UsersModule, AuthModule],
-
   providers: [JwtStrategy],
 })
 export class AppModule {}
